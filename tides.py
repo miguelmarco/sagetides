@@ -1,3 +1,15 @@
+from tempfile import mkdtemp
+import shutil
+import os
+from sage.misc.flatten import flatten
+from sage.ext.fast_callable import fast_callable
+from sage.misc.lazy_import import lazy_import
+lazy_import('sage.rings.semirings.non_negative_integer_semiring', 'NN')
+from sage.rings.real_mpfr import RealField
+from sage.misc.functional import N
+
+
+
 def convert_list(f):
     """
     - f is a vectorial function f(x1, x2, ...) -> [...]
