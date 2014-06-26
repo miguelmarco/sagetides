@@ -100,23 +100,16 @@ def convert_list(f, parameters):
             stackcomp.append(-a)
 
     return stackcomp,detail
-def expresionIsConstant (ex,pars):
-    return  (set(ex.variables()).issubset(set(pars)))
 
-def remove_constants(l1,l2,pars):
+def remove_constants(l1,l2):
     i=0
-    constList1=[]
-    constList2=[]
     while i < len(l1):
         if (not l1[i] in SR):
             l1.pop(i)
             l2.pop(i)
-        elif expresionIsConstant (l1[i], pars):
-            constList1.append(l1.pop(i))
-            constList2.append(l2.pop(i))
         else:
             i+=1
-    return constList1, constList2
+
 
 
 def remove_repeated(l1, l2):
@@ -134,34 +127,7 @@ the same
             else:
                 j+=1
 
-def const_code_list (cons1, cons2, pars):
-    cons3=[]
-
-    for i in cons2:
-        oper = i[0]
-        if oper in ["log", "exp", "sin", "cos"]:
-            a = i[1]
-            if a in pars:
-                cons3.append ((oper, 'par[{}]'.format(par.index(a))))
-            else:
-                cons3.append ((oper, 'c[{}]'.format (cons1.index(a))))
-        else:
-            a=i[1]
-            b=i[2]
-            if a in pars:
-                aa = 'par[{}]'.format(pars.index(a))
-            else:
-                aa = 'c[{}]'.format(cons1.index(a))
-            if b in pars:
-                bb = 'par[{}]'.format(pars.index(a))
-            else:
-                bb = 'c[{}]'.format(cons1.index(a))
-
-            cons3.append ((oper, aa, bb))
-
-    return cons3
-
-def code_list(l1,l2,cons1,f,par):
+def code_list(l1,l2,f,pars):
     l3=[]
     var = f[0].arguments()
     for i in l2:
@@ -169,7 +135,9 @@ def code_list(l1,l2,cons1,f,par):
         if oper in ["log", "exp", "sin", "cos"]:
             a = i[1]
             if a in var:
-                l3.append((oper, 'var[{}]'.format(var.index(a)+1)))
+                l3.append((oper, 'var[{}]'.format(var.index(a))))
+            elif a in pars:
+                l3.append((oper, 'par[{}]'.format(pars.index(a))))
             else:
                 l3.append((oper, 'link[{}]'.format(l1.index(a))))
 
@@ -180,29 +148,23 @@ def code_list(l1,l2,cons1,f,par):
             constb=False
 
             if a in var:
-                aa = 'series[{}]'.format(var.index(a))
+                aa = 'var[{}]'.format(var.index(a))
             elif a in l1:
                 aa = 'link[{}]'.format(l1.index(a))
+            elif a in pars:
+                aa = 'par[{}]'.format(pars.index(a))
             else:
                 consta=True
-                if a in cons1:
-                    aa = 'c[{}]'.format(cons1.index(a))
-                elif a in par:
-                    aa = 'par[{}]'.format(par.index(a))
-                else:
-                    aa = str(a)
+                aa = str(a)
             if b in var:
                 bb = 'var[{}]'.format(var.index(b))
             elif b in l1:
                 bb = 'link[{}]'.format(l1.index(b))
+            elif b in pars:
+                bb = 'par[{}]'.format(pars.index(b))
             else:
                 constb=True
-                if b in cons1:
-                    bb = 'c[{}]'.format(cons1.index(b))
-                elif b in par:
-                    bb = 'par[{}]'.format(par.index(b))
-                else:
-                    bb = str(b)
+                bb = str(b)
             if consta:
                 oper += '_c'
                 if not oper=='div':
@@ -219,47 +181,54 @@ def sage_tides(f):
     remove_constants(l1,l2)
     return final_list(l1,l2,f)
 
-def parser_list(f):
+def parser_list(f, pars):
     variables = f[0].arguments()
     n = len(variables)
-    l1,l2 = convert_list(f)
+    l1,l2 = convert_list(f,pars)
     remove_repeat(l1,l2)
     remove_constants(l1,l2)
-    l3 = final_list (l1, l2, f)
+    l3 = code_list (l1, l2, f, pars)
     res = []
-    for i in range(len(l3)):
-        el = l3[i]
-        string = "XX[{}][i] = ".format(i + n)
-        if el[0] == 'add':
-            string += el[1] + "[i] + " + el[2] +"[i];"
-        elif el[0] == 'add_c':
-            string += "(i==0)? {}+".format(N(el[2])) + el[1] + "[0] : "+ el[1]+ "[i];"
-        elif el[0] == 'mul':
-            string += "mul_mc("+el[1]+","+el[2]+",i);"
-        elif el[0] == 'mul_c':
-            string += str(N(el[2])) + "*"+ el[1] + "[i];"
-        elif el[0] == 'pow_c':
-            string += "pow_mc_c("+el[1]+","+str(N(el[2]))+",XX[{}], i);".format(i+n)
-        elif el[0] == 'div':
-            string += "div_mc_c("+el[2]+","+el[1]+",XX[{}], i);".format(i+n)
-        elif el[0] == 'div_c':
-            string += "inv_mc_c("+str(N(el[2]))+","+el[1]+",XX[{}], i);".format(i+n)
-        elif el[0] == 'log':
-            string += "log_mc("+el[1]+",XX[{}], i);".format(i+n)
-        elif el[0] == 'exp':
-            string += "exp_mc("+el[1]+",XX[{}], i);".format(i+n)
-        elif el[0] == 'sin':
-            string += "sin_mc("+el[1]+",XX[{}], i);".format(i+n+1)
-        elif el[0] == 'cos':
-            string += "cos_mc("+el[1]+",XX[{}], i);".format(i+n-1)
 
-
-        res.append(string)
 
     l1 = list(variables)+l1
     indices = [l1.index(i(*variables))+n for i in f]
     for i in range (1,len(variables)):
-        res.append("XX[{}][i+1] = XX[{}][i] / (i+1.0);".format(i,indices[i-1]-len(variables)))
+        aux = indices[i-1]-len(variables)
+        if aux < len(variables):
+            res.append('double_var_t(itd, link[{}], var[{}], i);'.format(aux-1, i))
+        else:
+            res.append('double_var_t(itd, link[{}], var[{}], i);'.format(aux-len(variables), i))
+
+    for i in range(len(l3)):
+        el = l3[i]
+        string = "double_"
+        if el[0] == 'add':
+            string += 'add_t(itd, ' + el[1] + ', ' + el[2] + ', link[{}], i);'.format(i)
+        elif el[0] == 'add_c':
+            string += 'add_t_cc(itd, ' + str(N(el[2])) + ', ' + el[1] + ', link[{}], i);'.format(i)
+        elif el[0] == 'mul':
+            string += 'mul_t(itd, ' + el[1] + ', ' + el[2] + ', link[{}], i);'.format(i)
+        elif el[0] == 'mul_c':
+            string += 'mul_t_cc(itd, ' + str(N(el[2])) + ', ' + el[1] + ', link[{}], i);'.format(i)
+        elif el[0] == 'pow_c':
+            string += 'pow_t_cc(itd, ' + el[1] + ', ' + str(N(el[2])) + ', link[{}], i);'.format(i)
+        elif el[0] == 'div':
+            string += 'div_t(itd, ' + el[2] + ', ' + el[1] + ', link[{}], i);'.format(i)
+        elif el[0] == 'div_c':
+            string += 'div_t_cv(itd, ' + str(N(el[2])) + ', ' + el[1] + ', link[{}], i);'.format(i)
+        elif el[0] == 'log':
+            string += 'log_t(itd, ' + el[1]  + ', link[{}], i);'.format(i)
+        elif el[0] == 'exp':
+            string += 'exp_t(itd, ' + el[1]  + ', link[{}], i);'.format(i)
+        elif el[0] == 'sin':
+            string += 'sin_t(itd, ' + el[1]  + ', ', + 'link[{}]'.format(i+1) + ', link[{}], i);'.format(i)
+        elif el[0] == 'cos':
+            string += 'cos_t(itd, ' + el[1]  + ', ', + 'link[{}]'.format(i-1) + ', link[{}], i);'.format(i)
+
+
+        res.append(string)
+
 
     return res,n-1,1,len(res)
 
