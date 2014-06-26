@@ -161,7 +161,7 @@ def const_code_list (cons1, cons2, pars):
 
     return cons3
 
-def final_list(l1,l2,f, pars):
+def code_list(l1,l2,cons1,f,par):
     l3=[]
     var = f[0].arguments()
     for i in l2:
@@ -169,10 +169,9 @@ def final_list(l1,l2,f, pars):
         if oper in ["log", "exp", "sin", "cos"]:
             a = i[1]
             if a in var:
-                l3.append((oper, 'var[{}]'.format(var.index(a))))
-            elif a in l1:
+                l3.append((oper, 'var[{}]'.format(var.index(a)+1)))
+            else:
                 l3.append((oper, 'link[{}]'.format(l1.index(a))))
-
 
         else:
             a=i[1]
@@ -181,19 +180,29 @@ def final_list(l1,l2,f, pars):
             constb=False
 
             if a in var:
-                aa = 'XX[{}]'.format(var.index(a))
+                aa = 'series[{}]'.format(var.index(a))
             elif a in l1:
-                aa = 'XX[{}]'.format(l1.index(a)+len(var))
+                aa = 'link[{}]'.format(l1.index(a))
             else:
                 consta=True
-                aa = str(a)
+                if a in cons1:
+                    aa = 'c[{}]'.format(cons1.index(a))
+                elif a in par:
+                    aa = 'par[{}]'.format(par.index(a))
+                else:
+                    aa = str(a)
             if b in var:
-                bb = 'XX[{}]'.format(var.index(b))
+                bb = 'var[{}]'.format(var.index(b))
             elif b in l1:
-                bb = 'XX[{}]'.format(l1.index(b)+len(var))
+                bb = 'link[{}]'.format(l1.index(b))
             else:
                 constb=True
-                bb = str(b)
+                if b in cons1:
+                    bb = 'c[{}]'.format(cons1.index(b))
+                elif b in par:
+                    bb = 'par[{}]'.format(par.index(b))
+                else:
+                    bb = str(b)
             if consta:
                 oper += '_c'
                 if not oper=='div':
