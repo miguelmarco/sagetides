@@ -32,4 +32,33 @@
 long  function_iteration(iteration_data *itd, double t, double v[], double p[], int ORDER, double *cvfd)
 {
 
-    int i;
+    int i;	VARIABLES = 3;
+	PARAMETERS = 3;
+	LINKS = 13;
+	static int   FUNCTIONS        = 0;
+	static int   POS_FUNCTIONS[1] = {0};
+
+	initialize_dp_case();
+	double ct[] = {-1.};
+
+	for(i=0;  i<=ORDER; i++) {
+		double_var_t(itd, link[3], var[1], i);
+		double_var_t(itd, link[7], var[2], i);
+		double_var_t(itd, link[11], var[3], i);
+		double_mul_t_cc(itd, -1.00000000000000, var[2], link[0], i);
+		double_add_t(itd, link[0], var[1], link[1], i);
+		double_mul_t(itd, link[1], par[0], link[2], i);
+		double_mul_t_cc(itd, -1.00000000000000, link[2], link[3], i);
+		double_mul_t_cc(itd, -1.00000000000000, var[3], link[4], i);
+		double_add_t(itd, link[4], par[1], link[5], i);
+		double_mul_t(itd, var[1], link[5], link[6], i);
+		double_add_t(itd, link[0], link[6], link[7], i);
+		double_mul_t(itd, var[2], var[1], link[8], i);
+		double_mul_t(itd, var[3], par[2], link[9], i);
+		double_mul_t_cc(itd, -1.00000000000000, link[9], link[10], i);
+		double_add_t(itd, link[10], link[8], link[11], i);
+	}
+	write_dp_solution();
+
+	return NUM_COLUMNS;
+}

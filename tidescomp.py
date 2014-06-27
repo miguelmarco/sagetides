@@ -1,3 +1,5 @@
+import shutil
+
 def convert_list(f, parameters):
     """
     - f is a vectorial function f(x1, x2, ...) -> [...]
@@ -104,7 +106,7 @@ def convert_list(f, parameters):
 def remove_constants(l1,l2):
     i=0
     while i < len(l1):
-        if (not l1[i] in SR):
+        if l1[i] in RR:
             l1.pop(i)
             l2.pop(i)
         else:
@@ -185,7 +187,7 @@ def parser_list(f, pars):
     variables = f[0].arguments()
     n = len(variables)
     l1,l2 = convert_list(f,pars)
-    remove_repeat(l1,l2)
+    remove_repeated(l1,l2)
     remove_constants(l1,l2)
     l3 = code_list (l1, l2, f, pars)
     res = []
@@ -230,42 +232,52 @@ def parser_list(f, pars):
         res.append(string)
 
 
-    return res,n-1,1,len(res)
+    return res
 
-def genCodeSeries(f,fname):
-    code,VAR,PAR,TT = parser_list(f)
-    os.system ("cat seriesFile00.txt > " + fname)
+def genCodeSeries(f,fname, par):
+    code = parser_list(f, par)
+    VAR = len(f[0].arguments())-1
+    PAR = len(par)
+    TT =  len(code)+1-VAR
+    shutil.copy('seriesFileComp00.txt', fname)
     outfile = open(fname, 'a')
-    outfile.write("\tVAR = {};\n".format(VAR))
-    outfile.write("\tPAR = {};\n".format(PAR))
-    outfile.write("\tTT = {};\n".format(TT))
+    outfile.write("\tVARIABLES = {};\n".format(VAR))
+    outfile.write("\tPARAMETERS = {};\n".format(PAR))
+    outfile.write("\tLINKS = {};\n".format(TT))
+    outfile.write('\tstatic int   FUNCTIONS        = 0;\n')
+    outfile.write('\tstatic int   POS_FUNCTIONS[1] = {0};\n')
+    outfile.write('\n\tinitialize_dp_case();\n')
+    outfile.write('\tdouble ct[] = {-1.};\n')
+    outfile.write('\n\tfor(i=0;  i<=ORDER; i++) {\n')
+    for i in code:
+        outfile.write('\t\t'+i+'\n')
+
+    outfile.write('\t}\n\twrite_dp_solution();\n\n')
+    outfile.write('\treturn NUM_COLUMNS;\n}')
     outfile.close()
-    os.system ("cat seriesFile01.txt >> " + fname)
-    outfile = open(fname, 'a')
-    outfile.writelines(["\t\t"+i+"\n" for i in code])
-    outfile.close()
-    os.system ("cat seriesFile02.txt >> " + fname)
 
 
-def gendriver(nvars, fname, fileoutput, initial_values, initial=0.0, final = 100.0,
+
+def gendriver(nvars, fname, parameter_values, fileoutput, initial_values, initial=0.0, final = 100.0,
               delta=0.5, tolrel=1e-16, tolabs=1e-16):
-    os.system("cat driverFile00.txt > " + fname)
+    shutil.copy('driverFileComp00.txt', fname)
+    npar = len(parameter_values)
     outfile = open(fname, 'a')
-    outfile.write('\n\tVARS = {} ;\n'.format(nvars-1))
-    outfile.write('\tPARS = 1;\n')
-    outfile.write('\tdouble tolrel, tolabs, tini, tend, dt; \n')
-    outfile.write('\tdouble v[VARS], p[PARS]; \n')
+    outfile.write('\n\tint npar = {};\n'.format(npar))
+    outfile.write('\tdouble p[npar];\n')
+    for i in range(npar):
+        outfile.write('\tp[{}] = {};\n'.format(i,RR(parameter_values[i])))
+    outfile.write('\tint nvar = 3;\n\tdouble v[nvar];\n')
     for i in range(len(initial_values)):
-        outfile.write('\tv[{}] = {} ; \n'.format(i, initial_values[i]))
-    outfile.write('\ttini = {} ;\n'.format(initial))
-    outfile.write('\ttend = {} ;\n'.format(final))
-    outfile.write('\tdt   = {} ;\n'.format(delta))
-    outfile.write('\ttolrel = {} ;\n'.format(tolrel))
-    outfile.write('\ttolabs = {} ;\n'.format(tolabs))
-    outfile.write('\textern char ofname[20];')
-    outfile.write('\tstrcpy(ofname, "'+ fileoutput +'");\n')
-    outfile.write('\tminc_tides(v,VARS,p,PARS,tini,tend,dt,tolrel,tolabs);\n')
-    outfile.write('\treturn 0; \n }')
+        outfile.write('\tv[{}] = {} ;\n'.format(i,RR(initial_values[i])))
+    outfile.write('\tdouble tolrel = {} ;\n'.format(tolrel))
+    outfile.write('\tdouble tolabs = {} ;\n'.format(tolabs))
+    outfile.write('\tdouble tini = {};\n'.format(initial))
+    outfile.write('\tdouble dt = {};\n'.format(delta))
+    outfile.write('\tint nipt = {};\n'.format(floor((final-initial)/delta)))
+    outfile.write('\tFILE* fd = fopen("' + fileoutput + '", "w");\n')
+    outfile.write('\tdp_tides_delta(function_iteration, NULL, nvar, npar, nfun, v, p, tini, dt, nipt, tolrel, tolabs, NULL, fd);\n')
+    outfile.write('\tfclose(fd);\n\treturn 0;\n}')
     outfile.close()
 
 def salida(f, initial_values, filename, initial = 0, final = 100.0, delta = 0.5):

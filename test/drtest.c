@@ -33,3 +33,24 @@ long  function_iteration(iteration_data *itd, double t, double v[], double p[], 
 int main() {
 
 
+
+	int npar = 3;
+	double p[npar];
+	p[0] = 10.0000000000000;
+	p[1] = 28.0000000000000;
+	p[2] = 2.66666666666667;
+	int nvar = 3;
+	double v[nvar];
+	v[0] = 1.00000000000000 ;
+	v[1] = 0.700000000000000 ;
+	v[2] = 3.00000000000000 ;
+	double tolrel = 1e-16 ;
+	double tolabs = 1e-16 ;
+	double tini = 0.0;
+	double dt = 0.5;
+	int nipt = 200;
+	FILE* fd = fopen("output.txt", "w");
+	dp_tides_delta(function_iteration, NULL, nvar, npar, nfun, v, p, tini, dt, nipt, tolrel, tolabs, NULL, fd);
+	fclose(fd);
+	return 0;
+}
