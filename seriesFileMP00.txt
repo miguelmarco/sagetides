@@ -36,10 +36,3 @@ long  function_iteration(iteration_data *itd, mpfr_t t, mpfr_t v[], mpfr_t p[], 
 	int i;
 
 
-	write_mp_solution();
-	clear_vpl();
-	clear_cts();
-
-	return NUM_COLUMNS;
-}
-

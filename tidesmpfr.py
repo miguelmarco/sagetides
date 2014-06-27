@@ -251,7 +251,8 @@ def genCodeSeries(f,fname, par):
     for i in code:
         outfile.write('\t\t'+i+'\n')
 
-    outfile.write('\t}\n\twrite_dp_solution();\n\n')
+    outfile.write('\t}\n\twrite_mp_solution();\n\n')
+    outfile.wrote('\tclear_vpl();\n\tclear_cts();\n')
     outfile.write('\treturn NUM_COLUMNS;\n}')
     outfile.close()
 
@@ -259,7 +260,7 @@ def genCodeSeries(f,fname, par):
 
 def gendriver(nvars, fname, parameter_values, fileoutput, initial_values, initial=0.0, final = 100.0,
               delta=0.5, tolrel=1e-16, tolabs=1e-16):
-    shutil.copy('driverFileComp00.txt', fname)
+    shutil.copy('driverFileMP00.txt', fname)
     npar = len(parameter_values)
     outfile = open(fname, 'a')
     outfile.write('\n\tint npar = {};\n'.format(npar))
