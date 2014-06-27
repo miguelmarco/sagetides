@@ -367,8 +367,10 @@ void	mpfrts_div_t_vc(iteration_data *itd, mpfr_t *u, mpfr_t c, mpfr_t *w, int OR
 	mpfr_free_cache ();	
 }
 
-void	mpfrts_div_t_cv(iteration_data *itd, mpfr_t c, mpfr_t *u, mpfr_t *w, int ORDER_INDEX)
+void	mpfrts_div_t_cv(iteration_data *itd, char* cs, mpfr_t *u, mpfr_t *w, int ORDER_INDEX)
 {
+	mpfr_t c; mpfrts_init (&c);
+	mpfrts_set_str(&c, cs);
 	long i, j, vi;
 	mpfr_t sumint, sumext, partial, zero, f, wt;
 	mpfrts_init (&zero);
@@ -408,6 +410,7 @@ void	mpfrts_div_t_cv(iteration_data *itd, mpfr_t c, mpfr_t *u, mpfr_t *w, int OR
 			mpfrts_set(&w[i*itd->MAX_ORDER +ORDER_INDEX], sumext);
 		}
 	}
+	mpfr_clear (c);
 	mpfr_clear (sumint);
 	mpfr_clear (sumext);
 	mpfr_clear (partial);
