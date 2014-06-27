@@ -40,7 +40,7 @@ int       defect_error_control = 0;
 int       dense_output = -1, coef_output = 0;
 int       accepted_steps = 0, rejected_steps = 0;
 int       ipos = 1;
-char      ofname[20]="", cfname[20]="";
+char      ofname[500]="", cfname[500]="";
 FILE      *fd, *fc;
 
 

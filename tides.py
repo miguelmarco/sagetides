@@ -551,7 +551,7 @@ def desolve_mintides(f, ics, initial, final, delta,  tolrel=1e-16, tolabs=1e-16)
         l = l.split(' ')
         l = filter(lambda a: len(a) > 2, l)
         res[i] = map(RR,l)
-    shutil.rmtree(tempdir)
+    #shutil.rmtree(tempdir)
 
     return res
 
