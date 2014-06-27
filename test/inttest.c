@@ -40,7 +40,7 @@ long  function_iteration(iteration_data *itd, double t, double v[], double p[], 
 	static int   POS_FUNCTIONS[1] = {0};
 
 	initialize_dp_case();
-	double ct[] = {-1.};
+
 
 	for(i=0;  i<=ORDER; i++) {
 		double_var_t(itd, link[3], var[1], i);

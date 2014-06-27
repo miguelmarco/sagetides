@@ -204,21 +204,21 @@ def parser_list(f, pars):
 
     for i in range(len(l3)):
         el = l3[i]
-        string = "double_"
+        string = "mpfrts_"
         if el[0] == 'add':
             string += 'add_t(itd, ' + el[1] + ', ' + el[2] + ', link[{}], i);'.format(i)
         elif el[0] == 'add_c':
-            string += 'add_t_cc(itd, ' + str(N(el[2])) + ', ' + el[1] + ', link[{}], i);'.format(i)
+            string += 'add_t_cc(itd, "' + str(N(el[2])) + '", ' + el[1] + ', link[{}], i);'.format(i)
         elif el[0] == 'mul':
             string += 'mul_t(itd, ' + el[1] + ', ' + el[2] + ', link[{}], i);'.format(i)
         elif el[0] == 'mul_c':
-            string += 'mul_t_cc(itd, ' + str(N(el[2])) + ', ' + el[1] + ', link[{}], i);'.format(i)
+            string += 'mul_t_cc(itd, "' + str(N(el[2])) + '", ' + el[1] + ', link[{}], i);'.format(i)
         elif el[0] == 'pow_c':
-            string += 'pow_t_cc(itd, ' + el[1] + ', ' + str(N(el[2])) + ', link[{}], i);'.format(i)
+            string += 'pow_t_cc(itd, ' + el[1] + ', "' + str(N(el[2])) + '", link[{}], i);'.format(i)
         elif el[0] == 'div':
             string += 'div_t(itd, ' + el[2] + ', ' + el[1] + ', link[{}], i);'.format(i)
         elif el[0] == 'div_c':
-            string += 'div_t_cv(itd, ' + str(N(el[2])) + ', ' + el[1] + ', link[{}], i);'.format(i)
+            string += 'div_t_cv(itd, "' + str(N(el[2])) + '", ' + el[1] + ', link[{}], i);'.format(i)
         elif el[0] == 'log':
             string += 'log_t(itd, ' + el[1]  + ', link[{}], i);'.format(i)
         elif el[0] == 'exp':
@@ -239,14 +239,14 @@ def genCodeSeries(f,fname, par):
     VAR = len(f[0].arguments())-1
     PAR = len(par)
     TT =  len(code)+1-VAR
-    shutil.copy('seriesFileComp00.txt', fname)
+    shutil.copy('seriesFileMP00.txt', fname)
     outfile = open(fname, 'a')
     outfile.write("\n\tstatic int VARIABLES = {};\n".format(VAR))
     outfile.write("\tstatic int PARAMETERS = {};\n".format(PAR))
     outfile.write("\tstatic int LINKS = {};\n".format(TT))
     outfile.write('\tstatic int   FUNCTIONS        = 0;\n')
     outfile.write('\tstatic int   POS_FUNCTIONS[1] = {0};\n')
-    outfile.write('\n\tinitialize_dp_case();\n')
+    outfile.write('\n\tinitialize_mp_case();\n')
     outfile.write('\n\tfor(i=0;  i<=ORDER; i++) {\n')
     for i in code:
         outfile.write('\t\t'+i+'\n')
