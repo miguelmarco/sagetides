@@ -32,9 +32,10 @@
 long  function_iteration(iteration_data *itd, double t, double v[], double p[], int ORDER, double *cvfd)
 {
 
-    int i;	VARIABLES = 3;
-	PARAMETERS = 3;
-	LINKS = 13;
+    int i;
+	static int VARIABLES = 3;
+	static int PARAMETERS = 3;
+	static int LINKS = 13;
 	static int   FUNCTIONS        = 0;
 	static int   POS_FUNCTIONS[1] = {0};
 

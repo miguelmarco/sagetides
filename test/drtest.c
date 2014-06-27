@@ -32,6 +32,7 @@ long  function_iteration(iteration_data *itd, double t, double v[], double p[], 
 
 int main() {
 
+    int nfun =0;
 
 
 	int npar = 3;

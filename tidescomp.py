@@ -241,9 +241,9 @@ def genCodeSeries(f,fname, par):
     TT =  len(code)+1-VAR
     shutil.copy('seriesFileComp00.txt', fname)
     outfile = open(fname, 'a')
-    outfile.write("\tVARIABLES = {};\n".format(VAR))
-    outfile.write("\tPARAMETERS = {};\n".format(PAR))
-    outfile.write("\tLINKS = {};\n".format(TT))
+    outfile.write("\n\tstatic int VARIABLES = {};\n".format(VAR))
+    outfile.write("\tstatic int PARAMETERS = {};\n".format(PAR))
+    outfile.write("\tstatic int LINKS = {};\n".format(TT))
     outfile.write('\tstatic int   FUNCTIONS        = 0;\n')
     outfile.write('\tstatic int   POS_FUNCTIONS[1] = {0};\n')
     outfile.write('\n\tinitialize_dp_case();\n')
